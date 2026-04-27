@@ -3,6 +3,7 @@ import os
 from dataclasses import asdict, dataclass
 from typing import List, Optional
 
+from mser import DEFAULT_EMOTION2VEC_MODEL
 from mser.predict import MSERPredictor
 
 
@@ -42,8 +43,7 @@ class WhisperSpeechRecognizer:
             import whisper
         except ImportError as exc:
             raise ImportError(
-                "Whisper transcription requires `openai-whisper` and `torch`. "
-                "Please install the project dependencies first."
+                "Whisper 转写依赖 `openai-whisper` 和 `torch`，请先安装运行依赖。"
             ) from exc
         device = "cuda" if self.use_gpu and torch.cuda.is_available() else "cpu"
         self._model = whisper.load_model(self.model_size, device=device)
@@ -64,13 +64,10 @@ class WhisperSpeechRecognizer:
 class SpeechEmotionPipeline:
     def __init__(
         self,
-        emotion_configs="configs/bi_lstm.yml",
-        emotion_model_path="models/BiLSTM_Emotion2Vec/best_model/",
-        use_ms_model=None,
+        emotion_model=DEFAULT_EMOTION2VEC_MODEL,
         whisper_model="base",
         language=None,
         use_gpu=True,
-        overwrites=None,
     ):
         self.speech_recognizer = WhisperSpeechRecognizer(
             model_size=whisper_model,
@@ -78,11 +75,8 @@ class SpeechEmotionPipeline:
             use_gpu=use_gpu,
         )
         self.emotion_recognizer = MSERPredictor(
-            configs=emotion_configs,
-            use_ms_model=use_ms_model,
-            model_path=emotion_model_path,
+            emotion_model=emotion_model,
             use_gpu=use_gpu,
-            overwrites=overwrites,
         )
 
     def analyze(self, audio_path):
