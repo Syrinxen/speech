@@ -142,20 +142,35 @@ class MSERPredictor:
         :param sample_rate: 如果传入的事numpy数据，需要指定采样率
         :return: 结果标签和对应的得分
         """
+        ranked_results = self.predict_scores(audio_data=audio_data, sample_rate=sample_rate)
+        return ranked_results[0]["label"], ranked_results[0]["confidence"]
+
+    def predict_scores(self, audio_data, sample_rate=16000):
+        """预测并返回按置信度排序的情绪得分列表"""
         if self.use_ms_model is not None:
-            labels, scores = self.predictor.predict(audio_data)
-            return labels[0], scores[0]
-        # 加载音频文件，并进行预处理
+            ranked_results = self.predictor.predict_scores(audio_data)
+            return [
+                {
+                    "label": label,
+                    "confidence": score,
+                    "score": round(float(score) * 100, 2),
+                }
+                for label, score in ranked_results[0]
+            ]
         input_data = self._load_audio(audio_data=audio_data, sample_rate=sample_rate)
         input_data = torch.tensor(input_data, dtype=torch.float32, device=self.device).unsqueeze(0)
-        # 执行预测
         output = self.predictor(input_data)
         result = torch.nn.functional.softmax(output, dim=-1)[0]
         result = result.data.cpu().numpy()
-        # 最大概率的label
-        lab = np.argsort(result)[-1]
-        score = result[lab]
-        return self.class_labels[lab], round(float(score), 5)
+        ranked_results = []
+        for index in np.argsort(result)[::-1]:
+            confidence = round(float(result[index]), 5)
+            ranked_results.append({
+                "label": self.class_labels[index],
+                "confidence": confidence,
+                "score": round(confidence * 100, 2),
+            })
+        return ranked_results
 
     def predict_batch(self, audios_data: List, sample_rate=16000):
         """预测一批音频的特征

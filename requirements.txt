@@ -19,3 +19,4 @@ funasr>=1.0.27
 modelscope>=1.13.3
 loguru>=0.7.2
 yeaudio>=0.0.7
+openai-whisper

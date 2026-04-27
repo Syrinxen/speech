@@ -30,15 +30,23 @@ class Emotion2vecPredict(object):
         return feats
 
     def predict(self, audio):
-        res = self.model.generate(audio, granularity="utterance", extract_embedding=False)
+        ranked_results = self.predict_scores(audio)
         labels, scores = [], []
-        for result in res:
-            label, score = result["labels"], result["scores"]
-            lab = np.argsort(score)[-1]
-            s = score[lab]
-            l = label[lab].split("/")[0]
-            labels.append(l)
-            scores.append(round(float(s), 5))
+        for result in ranked_results:
+            label, score = result[0]
+            labels.append(label)
+            scores.append(score)
         return labels, scores
+
+    def predict_scores(self, audio):
+        res = self.model.generate(audio, granularity="utterance", extract_embedding=False)
+        ranked_results = []
+        for result in res:
+            pairs = []
+            for label, score in zip(result["labels"], result["scores"]):
+                pairs.append((label.split("/")[0], round(float(score), 5)))
+            pairs.sort(key=lambda item: item[1], reverse=True)
+            ranked_results.append(pairs)
+        return ranked_results
 
 

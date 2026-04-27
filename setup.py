@@ -28,6 +28,11 @@ if __name__ == "__main__":
         name='mser',
         packages=find_packages(),
         package_data={'': ['configs/*']},
+        entry_points={
+            'console_scripts': [
+                'mser-speech=mser.cli:main',
+            ]
+        },
         author='yeyupiaoling',
         version=VERSION,
         install_requires=parse_requirements(),
