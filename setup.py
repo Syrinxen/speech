@@ -19,13 +19,18 @@ setup(
     author="yeyupiaoling",
     version=mser.__version__,
     install_requires=parse_requirements(),
-    description="Speech emotion recognition toolkit based on emotion2vec",
+    description="Emotion-aware speech analysis toolkit with text restoration and intensity evaluation",
     long_description=readme(),
     long_description_content_type="text/markdown",
     url="https://github.com/yeyupiaoling/SpeechEmotionRecognition-Pytorch",
     download_url="https://github.com/yeyupiaoling/SpeechEmotionRecognition-Pytorch.git",
-    keywords=["audio", "emotion2vec", "speech"],
-    entry_points={"console_scripts": ["mser-speech=mser.cli:main"]},
+    keywords=["audio", "emotion2vec", "speech", "fastapi", "emotion"],
+    entry_points={
+        "console_scripts": [
+            "mser-speech=mser.cli:main",
+            "mser-api=mser.api:main",
+        ]
+    },
     classifiers=[
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",

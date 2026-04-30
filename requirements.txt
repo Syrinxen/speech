@@ -2,3 +2,6 @@ loguru>=0.7.2
 funasr>=1.0.27
 modelscope>=1.13.3
 openai-whisper
+fastapi>=0.115.0
+uvicorn>=0.30.0
+python-multipart>=0.0.9

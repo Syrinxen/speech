@@ -56,6 +56,9 @@ def format_console_output(result):
             f"emotion: {result.emotion}",
             f"confidence: {result.confidence:.5f}",
             f"emotion_score: {result.emotion_score:.2f}",
+            f"intensity_level: {result.intensity.level_name} ({result.intensity.level_code})",
+            f"emotion_description: {result.intensity.description}",
+            f"restored_text: {result.text_restoration.restored_text}",
             f"top3_emotions: {ranking_preview}",
         ]
     )

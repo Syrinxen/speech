@@ -1,4 +1,4 @@
-__version__ = "0.0.11"
+__version__ = "0.2.0"
 
 DEFAULT_EMOTION2VEC_MODEL = "iic/emotion2vec_plus_base"
 SUPPORT_EMOTION2VEC_MODEL = [

@@ -4,6 +4,7 @@ from dataclasses import asdict, dataclass
 from typing import List, Optional
 
 from mser import DEFAULT_EMOTION2VEC_MODEL
+from mser.emotion_service import EmotionBusinessService
 from mser.predict import MSERPredictor
 
 
@@ -15,6 +16,26 @@ class EmotionScore:
 
 
 @dataclass
+class EmotionIntensityInfo:
+    score: float
+    confidence: float
+    level_code: str
+    level_name: str
+    description: str
+    valence: str
+    primary_emotion: str
+    primary_emotion_name: str
+
+
+@dataclass
+class EmotionTextRestoreInfo:
+    normalized_text: str
+    restored_text: str
+    speaking_style: str
+    suggestions: List[str]
+
+
+@dataclass
 class SpeechEmotionResult:
     audio_path: str
     transcript: str
@@ -23,6 +44,8 @@ class SpeechEmotionResult:
     confidence: float
     emotion_score: float
     emotion_ranking: List[EmotionScore]
+    intensity: EmotionIntensityInfo
+    text_restoration: EmotionTextRestoreInfo
 
     def to_dict(self):
         return asdict(self)
@@ -78,6 +101,7 @@ class SpeechEmotionPipeline:
             emotion_model=emotion_model,
             use_gpu=use_gpu,
         )
+        self.business_service = EmotionBusinessService()
 
     def analyze(self, audio_path):
         if not os.path.exists(audio_path):
@@ -86,6 +110,16 @@ class SpeechEmotionPipeline:
         transcript, detected_language = self.speech_recognizer.transcribe(audio_path)
         emotion_ranking = self.emotion_recognizer.predict_scores(audio_path)
         top_emotion = emotion_ranking[0]
+        intensity = self.business_service.evaluate_intensity(
+            emotion=top_emotion["label"],
+            confidence=top_emotion["confidence"],
+        )
+        restoration = self.business_service.restore_text(
+            text=transcript,
+            emotion=top_emotion["label"],
+            confidence=top_emotion["confidence"],
+            language=detected_language,
+        )
         return SpeechEmotionResult(
             audio_path=os.path.abspath(audio_path),
             transcript=transcript,
@@ -101,6 +135,8 @@ class SpeechEmotionPipeline:
                 )
                 for item in emotion_ranking
             ],
+            intensity=EmotionIntensityInfo(**intensity.to_dict()),
+            text_restoration=EmotionTextRestoreInfo(**restoration.to_dict()),
         )
 
     @staticmethod
