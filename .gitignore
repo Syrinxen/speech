@@ -4,6 +4,7 @@ build/
 dist/
 mser.egg-info/
 dataset/
+Audio_Speech_Actors_01-24/
 log/
 output/
 models/
